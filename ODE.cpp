@@ -4,200 +4,216 @@
 #include <math.h>
 #include <cmath>
 
-float norma(float x[2]);
-void ProductoPorComponentes(float c,float x[2], float r[2]);
-void SumaVectores(float x[2], float y[2], float r[2]);
-void RestaVectores(float x[2], float y[2], float r[2]);
-void a(float v[2], float g[2], float m, float k, float r[2]);
-void rk4(float t1,float x1[2],float v1[2],float h,float g[2],float m,float k, float v[2], float x[2]);
-void rk4TMax(float xi[2], float vi[2], float ti, float h, float m, float g[2], float k, FILE *d);
+float norma(float x, float y);
+float ax(float c, float m,float vx, float vy, float g);
+float ay(float c, float m,float vx, float vy, float g);
+void imprimir(float t,float x, float y,float vx, float vy, FILE *d);
+float rk4(float c, float m,float vx, float vy, float g, float x,float y,float h, float t, FILE *d);
+void variosTheta(float c, float m,float v, float g, float x,float y,float h, float t,float thetai, float thetaf, FILE *d);
+
+using namespace std;
 
 int main()
 {
  /* Constantes del movimiento
  Despues de haber sido definidas no cambia en la ejecución*/
  
- float gy =10.0; //Valor de Gravedad
+ float g =10.0; //Valor de Gravedad
  float m =0.2;  //Masa del proyectil en Kg
- float k = 0.2;  //Factor de friccion
+ float c = 0.2;  //Factor de friccion
  float dt =0.001; //saltos de tiempo valor seleccionado por el usuario
  float PI = 3.141592654; // Para convertir de grados a radianes
  float theta; //angulo de la velocidad
- float g[2]; //vector de velocidad
- 
- g[0]=0;//Componente de la gravedad x
- g[1]=-gy;//Componente de gravedad y
 
- //Variables del movimiento
- float x[2];
- float v[2];
- float t=0;
- float tMax;
-  
- //Primera parte x(t=0)=(0,0)
- //Theta 30 grados
- //v=300 m/s
- x[0]=0;
- x[1]=0;
-
+ //condiciones iniciales del movimiento
  theta=45.0*PI/180.0;
- v[0]=300.0*cos(theta);
- v[1]=300.0*sin(theta);
+ float x0=0;
+ float y0=0;
+ float v0=300;
+ float vx0=v0*cos(theta);
+ float vy0=v0*sin(theta);;
+ float t0=0;
  
- FILE *output;
- output = fopen("45grados.txt","w");
+ //Datos del movimiento x,y,vx,vy
+ float x;
+ float y;
+ float vx;
+ float vy;
+ float t;
+ 
+ //Se inicializan las variables en las condiciones iniciales
+ x=x0;
+ y=y0;
+ vx=vx0;
+ vy=vy0;
+ t=t0;
 
- rk4TMax(x,v,t,dt,m,g,k,output);
+  
+ //Se ejecuta runge kutta 4 para estas condiciones iniciales
+ //Se generara un documento de 5 columnas con los datos del movimiento
+ //El orden de las columnas es: t x y vx vy
+ FILE *output;
+ output=fopen("45grados.txt", "w");
+ float xf = rk4(c,m,vx,vy,g,x,y,dt,t,output);
  
+ //Se imprime la distancia reccorida
+ cout << "La distancia recorrida fue " << xf << " m." << endl;
+ 
+ //Se cierra el documento
  fclose(output);
  
+ //Ahora se probara este metodo para theta entre 10 hasta 70 grados
+ FILE *output2;
+ output2=fopen("10-70grados.txt", "w");
+ variosTheta(c,m,v0,g,x,y,dt,t,10,70,output2);
+ fclose(output2);
+
  return 0;
 }
 
-/*Norma de un vector en 2D*/
-float norma(float x[2]){
- float r2 = pow(x[0],2) + pow(x[1],2);
+/*Norma de un vector componetes x y y*/
+float norma(float x, float y){
+ float r2 = pow(x,2) + pow(y,2);
  float r= sqrt(r2);
  return r;
 }
-/*En un arreglo de 2D guarda el producto de una constante por un vector*/
-void ProductoPorComponentes(float c,float x[2], float r[2]){
- r[0]=c*x[0];
- r[1]=c*x[1];
+
+
+/*Aceleracion en x*/
+float ax(float c, float m,float vx, float vy, float g){
+ float a = -(c*vx*norma(vx,vy))/m;
+ return a;
 }
 
-/*En un arreglo de 2D guarda la suma de 2 vectores 2D*/
-void SumaVectores(float x[2], float y[2], float r[2]){
- r[0]=x[0]+y[0];
- r[1]=x[1]+y[1];
+/*Aceleracion en y*/
+float ay(float c, float m,float vx, float vy, float g){
+ float a = -g-((c*vx*norma(vx,vy))/m);
+ return a;
 }
 
-/*En un arreglo de 2D guarda la suma de 2 vectores 2D*/
-void RestaVectores(float x[2], float y[2], float r[2]){
- r[0]=x[0]-y[0];
- r[1]=x[1]-y[1];
+/*Imprime los parametros de entrada en el mismo orden en un archivo d */
+void imprimir(float t,float x, float y,float vx, float vy, FILE *d){
+ fprintf(d, "%f %f %f %f %f\n", t,x,y,vx,vy);
 }
 
-/*Calcula la aceleracion del movimiento */
-void a(float v[2], float g[2], float m, float k, float r[2]){
- float kmv=-k/norma(v)*m;
- ProductoPorComponentes(kmv, v, r);
- RestaVectores(g, r, r);
-}
 
-/*Rellena dos arreglos de 2D de x y v, utlizando el metodo runge kutta para hallar el siguiente en un t1.*/
-void rk4(float t1,float x1[2],float v1[2],float h,float g[2],float m,float k, float v[2], float x[2]){
- // Calcula k1 en t1
- float k1[2];
- a(v1,g,m,k,k1);
- 
- //Halla v1 + k1*h/2
- float vk2[2];
- ProductoPorComponentes(h/2, k1, vk2);
- SumaVectores(v1, vk2,vk2);
- //Halla k2 t1 + h/2 con vk2
- float k2[2];
- a(vk2,g,m,k,k2);
- 
- //Halla v1 + k2*h/2
- float vk3[2];
- ProductoPorComponentes(h/2, k2, vk3);
- SumaVectores(v1, vk3,vk3);
- //Halla k3 t1 + h/2 con vk2
- float k3[2];
- a(vk3,g,m,k,k3);
- 
- //Halla v1 + k3*h
- float vk4[2];
- ProductoPorComponentes(h, k3, vk4);
- SumaVectores(v1, vk4,vk4);
- //Halla k3 t1 + h con vk2
- float k4[2];
- a(vk4,g,m,k,k4);
+/*Ejecuta el metodo runge kutta de orden 4 para un tiro parabolico, halla las posiciones x/y y las velocidades vx/vy las imprime en un documeto d.*/
+float rk4(float c, float m,float vx, float vy, float g, float x,float y,float h, float t, FILE *d){
+ //El indicador funciona como controlador que frena rk4 cuando vx<=0 o/y y<=0
+ bool indicador = true;
+ //imprime las condiciones iniciales
+ imprimir(t,x,y,vx, vy,d);
+ while(indicador){
+  // los runge kutta. K1-2-3-4, genrados por la velociadad por componetes
+  float k1x=0.0;
+  float k2x=0.0;
+  float k3x=0.0;
+  float k4x=0.0;
+  float k1y=0.0;
+  float k2y=0.0;
+  float k3y=0.0;
+  float k4y=0.0;
+  
+  // los runge kutta. K1-2-3-4, genrados para las posiciones
+  float k1xi=0.0;
+  float k2xi=0.0;
+  float k3xi=0.0;
+  float k4xi=0.0;
+  float k1yi=0.0;
+  float k2yi=0.0;
+  float k3yi=0.0;
+  float k4yi=0.0;
 
- //velocidad en el metodo rk4 equivaldra a v = v1 +(k1 + 2*k2 +   2*k3 + k4)*h/6
- float Vnew[2];
- // multiplicacion 2*k2
- float Dosk2[2];
- ProductoPorComponentes(2, k2, Dosk2);
- // multiplicacion 2*k3
- float Dosk3[2];
- ProductoPorComponentes(2, k3, Dosk3);
- //Suma de k1 + Dosk2 + Dosk3 + k4
- float sumak [2];
- SumaVectores(k1,Dosk2,sumak);
- SumaVectores(sumak,Dosk3,sumak);
- SumaVectores(sumak,k4,sumak);
- // suma por h/6
- ProductoPorComponentes(h/6, sumak, Vnew);
- // lo anterior mas v1
- SumaVectores(v1,Vnew,Vnew);
- // Vnew es igual a la velocidad en t
- 
- /////////////////////////////////////////////////
+  //Posiciones y velocidades actuales calculadas
+  float xActual=0.0;
+  float yActual=0.0;
+  float vxActual=0.0;
+  float vyActual=0.0;
 
- //calcular k1 para x en t
- float xk1[2];
- xk1[0]=v1[0];
- xk1[1]=v1[1];
+  // Cacula K1-2-3-4 para la velociad por componentes
+  k1x = ax(c,m,vx,vy,g);
+  k1y = ay(c,m,vx,vy,g);
 
- //Calcular k2 para x en t + h/2
- float xk2[2];
- ProductoPorComponentes(h/2, xk1, xk2);
- SumaVectores(v1,xk2,xk2);
+  k2x = ax(c,m,vx+0.5*h*k1x,vy+0.5*h*k1y,g);
+  k2y = ay(c,m,vx+0.5*h*k1x,vy+0.5*h*k1y,g);
 
- //calcular k3 para x en t + h/2
- float xk3[2];
- ProductoPorComponentes(h/2, xk2, xk3);
- SumaVectores(v1,xk3,xk3);
- 
- //calcular k4 para x en t + h
- float xk4[2];
- ProductoPorComponentes(h, xk3, xk4);
- SumaVectores(v1,xk4,xk4);
+  k3x = ax(c,m,vx+0.5*h*k2x,vy+0.5*h*k2y,g);
+  k3y = ay(c,m,vx+0.5*h*k2x,vy+0.5*h*k2y,g);
 
- //Calcula x sera igual a x=x1+(xk1+2*xk2+2*xk3+xk4)*(h/6)
- float Xnew[2];
- // multiplicacion 2*xk2
- float Dosxk2[2];
- ProductoPorComponentes(2, xk2, Dosxk2);
- // multiplicacion 2*xk3
- float Dosxk3[2];
- ProductoPorComponentes(2, xk3, Dosxk3);
- //Suma de xk1 + Dosxk2 + Dosxk3 + xk4
- float sumaxk[2];
- SumaVectores(xk1,Dosxk2,sumaxk);
- SumaVectores(sumaxk,Dosxk3,sumaxk);
- SumaVectores(sumaxk,xk4,sumaxk);
- // suma por h/6
- ProductoPorComponentes(h/6, sumaxk, Xnew);
- // lo anterior mas x1
- SumaVectores(x1,Xnew,Xnew);
- // Xnew es igual a la velocidad en t
+  k4x = ax(c,m,vx+h*k3x,vy+h*k3y,g);
+  k4y = ay(c,m,vx+h*k3x,vy+h*k3y,g);
+  
+  //Halla cada conponente de la velociada en base runge kutta orden 4.
+  // Utiliza k1-2-3-4 de la velocidad
+  vxActual= vx + ((1.0/6.0)*(k1x+2*k2x+2*k3x+k4x)*h);
+  vyActual= vy + ((1.0/6.0)*(k1y+2*k2y+2*k3y+k4y)*h);
 
- x[0]=Xnew[0];
- x[1]=Xnew[1];
- v[0]=Vnew[0];
- v[1]=Vnew[1];
-}
+  //Calcula los k1-2-3-4 para las posicion por componentes
+  k1xi = vx;
+  k1yi = vy;
 
-/*Ejecuta runge kutta 4 hasta t max e imprime los resultados en un archivo de texto*/
-void rk4TMax(float xi[2], float vi[2], float ti, float h, float m, float g[2], float k, FILE *d){
- float x[2];
- x[0]=xi[0];
- x[1]=xi[1];
- float v[2];
- v[0]=vi[0];
- v[1]=vi[1];
- float t = ti;
- fprintf(d, "%f %f %f %f %f\n",t,x[0],x[1],v[0],v[1]);
- bool sigue=true;
- while(t<1000){
-  rk4(t,x,v,h,g,m,k,v,x);
-  t = t + h;
-  fprintf(d, "%f %f %f %f %f\n",t,x[0],x[1],v[0],v[1]);
-  if(x[1] == 0){
-  sigue = false;
+  k2xi = vx + k1xi*h*0.5;
+  k2yi = vy + k1yi*h*0.5;
+
+  k3xi = vx + k2xi*h*0.5;
+  k3yi = vy + k2yi*h*0.5;
+
+  k4xi = vx + k3xi*h;
+  k4yi = vy + k3yi*h;
+
+  //Calcila por componentes la posicion  
+  xActual= x + ((1.0/6.0)*(k1xi+2*k2xi+2*k3xi+k4xi)*h);
+  yActual= y + ((1.0/6.0)*(k1yi+2*k2yi+2*k3yi+k4yi)*h);
+
+  //Actualiza los valores de x,y,vx,vy,t
+  x=xActual;
+  y=yActual;
+  vx=vxActual;
+  vy=vyActual;
+  t=t+h;
+
+  //verifica c ondiciones de frenado del movimiento
+  if(y>=0 and vx>=0){
+   imprimir(t,x,y,vx,vy,d);
   }
- } 
+  else{
+   indicador = false;
+  }
+ }
+ //retorna la distancia recorrida en x
+ return x;
+}
+
+/*Ejecutara rk4 para thetha entre thetai hasta thethaf, guardadara los datos para cada theta e informara en consola el angulo con mayor distancia recorrida */
+void variosTheta(float c, float m,float v, float g, float x,float y,float h, float t,float thetai, float thetaf, FILE *d){
+ float PI = 3.141592654;
+ float thetaActual=thetai;
+ float rx[7];
+ int i = 0;
+
+ //Ejecuta rk4 para cada theta guarda las distancias recorridas
+ while(thetaActual<=thetaf){
+  float thetaRad=thetaActual*PI/180.0;
+  float vx=v*cos(thetaRad);
+  float vy=v*sin(thetaRad);
+  rx[i]=rk4(c,m,vx,vy,g,x,y,h,t,d);
+  fprintf(d, ","); 
+  fprintf(d, "\n"); 
+  thetaActual=thetaActual+10.0;
+  i=i+1;
+ }
+
+ //Recorre rx para hallar el mayor x recorrido
+ int k=0;
+ float xi=0;
+ for(int j = 0; j<7; j++){
+  if(rx[j] > xi){
+   xi=rx[j];
+   k=j;
+  }
+ }
+ 
+ float thetak= (k+1)*10;
+ float r= xi;
+ cout << "para angulos entre 10 y 70 grados la mayor distancia recorrida es " << r << " m que corresponde a un angulo de " << thetak << " grados." << endl;
 }
