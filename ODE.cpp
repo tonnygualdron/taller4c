@@ -197,7 +197,11 @@ void variosTheta(float c, float m,float v, float g, float x,float y,float h, flo
   float vx=v*cos(thetaRad);
   float vy=v*sin(thetaRad);
   rx[i]=rk4(c,m,vx,vy,g,x,y,h,t,d);
-  fprintf(d, ","); 
+  for(int i=0; i <4; i++){
+   fprintf(d, "999");
+   fprintf(d, " ");
+  }
+  fprintf(d, "999");
   fprintf(d, "\n"); 
   thetaActual=thetaActual+10.0;
   i=i+1;
