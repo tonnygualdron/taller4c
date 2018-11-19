@@ -4,14 +4,14 @@
 #include <math.h>
 #include <cmath>
 
+using namespace std;
+
 float norma(float x, float y);
 float ax(float c, float m,float vx, float vy, float g);
 float ay(float c, float m,float vx, float vy, float g);
 void imprimir(float t,float x, float y,float vx, float vy, FILE *d);
 float rk4(float c, float m,float vx, float vy, float g, float x,float y,float h, float t, FILE *d);
 void variosTheta(float c, float m,float v, float g, float x,float y,float h, float t,float thetai, float thetaf, FILE *d);
-
-using namespace std;
 
 int main()
 {
