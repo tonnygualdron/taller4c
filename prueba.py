@@ -43,27 +43,28 @@ for i in range(31):
 plt.close()
 
 from mpl_toolkits.mplot3d import Axes3D
+import imageio
 
+filenames = []
 
+for i in range(31):
+    filenames.append(str(i)+".png")
 X = np.linspace(0,0.5,103)
 Y =  np.linspace(0,0.5,103)
 X, Y = np.meshgrid(X, Y)
-Z = np.asarray(data3[0])
-fig = plt.figure() 
-ax = fig.gca(projection='3d')
-surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.cm.jet, linewidth=0.01, antialiased=False)
-plt.show(block=False)
-# draw some data in loop
+
 for i in range(31):
-    # wait for a second
-    time.sleep(0.00001)
-    # replace the image contents
-    surf = ax.plot_surface(X, Y, np.asarray(data3[i]), rstride=1, cstride=1, cmap=plt.cm.jet, linewidth=0.01, antialiased=False)
-    # redraw the figure
-    fig.canvas.draw()
-    print(i)
-plt.savefig("lalala.gif")
+    Z = np.asarray(data3[i])
+    fig = plt.figure() 
+    ax = fig.gca(projection='3d')
+    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.cm.jet, linewidth=0.01, antialiased=False)
+    plt.savefig(filenames[i])
 plt.close()
+images=[]
+
+for i in range(31):
+    images.append(imageio.imread(filenames[i]))
+imageio.mimsave('movie.gif', images)
 
 
 
