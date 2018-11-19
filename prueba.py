@@ -30,7 +30,7 @@ for i in range(31):
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-im = ax.imshow(data3[0]))
+im = ax.imshow(data3[0])
 plt.show(block=False)
 for i in range(31):
     # wait for a second
@@ -40,8 +40,10 @@ for i in range(31):
     # redraw the figure
     fig.canvas.draw()
     print(i)
+plt.close()
 
 from mpl_toolkits.mplot3d import Axes3D
+
 
 X = np.linspace(0,0.5,103)
 Y =  np.linspace(0,0.5,103)
