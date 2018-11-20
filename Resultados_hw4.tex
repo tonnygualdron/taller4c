@@ -1,0 +1,163 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Tarea 4}
+\author{Tonny Alberto Gualdron Pacheco}
+\date{November 2018}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\section{ODE}
+
+Movimiento de un proyectil con velocidad inicial de 300 m/s, masa 0.2 kg y una constante de fricción del aire con factor de 0.2.Se simulo el movimiento con el método runge kutta 4.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{45grados.jpg}
+\caption{45 grados}
+\label{fig:45}
+\end{figure}
+
+La distancia recorrida fue 4.37597 m.\\
+
+simulación para ángulo inicial entre 10 y 70 grados.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{10-70grados.jpg}
+\caption{10-70 grados}
+\label{fig:10-70}
+\end{figure}
+
+Para ángulos entre 10 y 70 grados la mayor distancia recorrida es 5.37768 m que corresponde a un ángulo de 20 grados.\\
+
+\section{PDE}
+
+El ejercicio consiste en una barra 373.15 K insertada en una piedra calcita, la barra tiene temperatura constante de 373.15 K y se simula la difusión térmica.\\ 
+
+\subsection{Fronteras igual a 283.15 K}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso1t0.jpg}
+\caption{Caso 1 t=0}
+\label{fig:1}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso1t1.jpg}
+\caption{Caso 1 t=1/4 T}
+\label{fig:2}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso1t2.jpg}
+\caption{Caso 1 t=3/4 T}
+\label{fig:3}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2t.jpg}
+\caption{Caso 1 t= T}
+\label{fig:4}
+\end{figure}
+
+Las anteriores gráficas presenta el comportamiento para condiciones de frontera constantes, es el caso con el cual se llega mas rápido al equilibrio térmico.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso1Tprom.jpg}
+\caption{Caso 1 temperatura promedio VS tiempo}
+\label{fig:13}
+\end{figure}
+
+\subsection{Fronteras abiertas}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2t0.jpg}
+\caption{Caso 2 t=0}
+\label{fig:5}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2t1.jpg}
+\caption{Caso 2 t=1/4 T}
+\label{fig:6}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2t2.jpg}
+\caption{Caso 2 t=3/4 T}
+\label{fig:7}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2t.jpg}
+\caption{Caso 2 t= T}
+\label{fig:8}
+\end{figure}
+
+Las anteriores gráficas presenta el comportamiento para condiciones de frontera abiertas, tiene un comportamiento similar al de fronteras constantes.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso2Tprom.jpg}
+\caption{Caso 2 temperatura promedio VS tiempo}
+\label{fig:14}
+\end{figure}
+
+\subsection{Fronteras periódicas}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso3t0.jpg}
+\caption{Caso 3 t=0}
+\label{fig:9}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso3t1.jpg}
+\caption{Caso 3 t=1/4 T}
+\label{fig:10}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso3t2.jpg}
+\caption{Caso 3 t=3/4 T}
+\label{fig:11}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso3t.jpg}
+\caption{Caso 3 t= T}
+\label{fig:12}
+\end{figure}
+
+Las anteriores gráficas presenta el comportamiento para condiciones de frontera periódicas, Tarda mas interacciones que las otras condiciones. Su comportamiento indica que plato no llega a un equilibrio continuo simétrico circular, sino que partes intermedias entre los bordes se calientan mas que los bordes. .\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Caso3Tprom.jpg}
+\caption{Caso 3 temperatura promedio VS tiempo}
+\label{fig:15}
+\end{figure}
+
+Se generaron animaciones movie.gif para caso1, movie2.gif para caso 2, movie3.gif para el caso 3, están en la carpeta de los archivos.
+
+\end{document}
+

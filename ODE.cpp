@@ -26,7 +26,7 @@ int main()
  float theta; //angulo de la velocidad
 
  //condiciones iniciales del movimiento
- theta=45.0*PI/180.0;
+ theta=45*PI/180.0;
  float x0=0;
  float y0=0;
  float v0=300;
@@ -87,7 +87,7 @@ float ax(float c, float m,float vx, float vy, float g){
 
 /*Aceleracion en y*/
 float ay(float c, float m,float vx, float vy, float g){
- float a = -g-((c*vx*norma(vx,vy))/m);
+ float a = -g-((c*vy*norma(vx,vy))/m);
  return a;
 }
 
@@ -143,10 +143,6 @@ float rk4(float c, float m,float vx, float vy, float g, float x,float y,float h,
   k4x = ax(c,m,vx+h*k3x,vy+h*k3y,g);
   k4y = ay(c,m,vx+h*k3x,vy+h*k3y,g);
   
-  //Halla cada conponente de la velociada en base runge kutta orden 4.
-  // Utiliza k1-2-3-4 de la velocidad
-  vxActual= vx + ((1.0/6.0)*(k1x+2*k2x+2*k3x+k4x)*h);
-  vyActual= vy + ((1.0/6.0)*(k1y+2*k2y+2*k3y+k4y)*h);
 
   //Calcula los k1-2-3-4 para las posicion por componentes
   k1xi = vx;
@@ -161,23 +157,34 @@ float rk4(float c, float m,float vx, float vy, float g, float x,float y,float h,
   k4xi = vx + k3xi*h;
   k4yi = vy + k3yi*h;
 
-  //Calcila por componentes la posicion  
   xActual= x + ((1.0/6.0)*(k1xi+2*k2xi+2*k3xi+k4xi)*h);
   yActual= y + ((1.0/6.0)*(k1yi+2*k2yi+2*k3yi+k4yi)*h);
 
-  //Actualiza los valores de x,y,vx,vy,t
-  x=xActual;
-  y=yActual;
-  vx=vxActual;
-  vy=vyActual;
-  t=t+h;
+  //Halla cada conponente de la velociada en base runge kutta orden 4.
+  // Utiliza k1-2-3-4 de la velocidad
+  vxActual= vx + ((1.0/6.0)*(k1x+2*k2x+2*k3x+k4x)*h);
+  vyActual= vy + ((1.0/6.0)*(k1y+2*k2y+2*k3y+k4y)*h);
 
-  //verifica c ondiciones de frenado del movimiento
-  if(y>=0 and vx>=0){
+  if(vxActual>=0 and yActual>=0){
+   //Actualiza los valores de x,y,vx,vy,t
+   x=xActual;
+   y=yActual;
+   vx=vxActual;
+   vy=vyActual;
+   t=t+h;
+   imprimir(t,x,y,vx,vy,d); 
+  } 
+  else if( vxActual<0 and yActual>=0){
+   //Actualiza los valores de x,y,vx,vy,t
+   x=x;
+   y=yActual;
+   vx=0.0;
+   vy=vyActual;
+   t=t+h;
    imprimir(t,x,y,vx,vy,d);
   }
   else{
-   indicador = false;
+   indicador=false;
   }
  }
  //retorna la distancia recorrida en x
